@@ -1,0 +1,206 @@
+:root {
+  --bg: #0b0f1a;
+  --text: #eef2ff;
+  --muted: #9aa3b2;
+  --card: rgba(255,255,255,0.08);
+  --accent: #7c5cff;
+  --accent-2: #00d4ff;
+  --ring: rgba(124,92,255,0.35);
+}
+
+:root[data-theme="light"] {
+  --bg: #f6f8ff;
+  --text: #12131a;
+  --muted: #4b5563;
+  --card: rgba(0,0,0,0.06);
+  --accent: #4f46e5;
+  --accent-2: #06b6d4;
+  --ring: rgba(79,70,229,0.25);
+}
+
+:root[data-theme="ocean"] {
+  --bg: #06162a;
+  --text: #e6f8ff;
+  --muted: #8bb3c2;
+  --card: rgba(255,255,255,0.08);
+  --accent: #00c2ff;
+  --accent-2: #00f5d4;
+  --ring: rgba(0,194,255,0.35);
+}
+
+:root[data-theme="sunset"] {
+  --bg: #1a0b0f;
+  --text: #ffe9e1;
+  --muted: #c7a7a0;
+  --card: rgba(255,255,255,0.08);
+  --accent: #ff7a59;
+  --accent-2: #ffd166;
+  --ring: rgba(255,122,89,0.35);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+a { color: var(--accent-2); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  position: relative;
+  z-index: 2;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logo img { width: 38px; height: 38px; }
+
+button {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 8px 20px var(--ring);
+}
+button:hover { transform: translateY(-1px); }
+button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.main {
+  padding: 2rem;
+  position: relative;
+  z-index: 2;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 1.5rem;
+  backdrop-filter: blur(10px);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(260px,1fr));
+  gap: 1.5rem;
+}
+
+label { display: block; margin-top: 0.75rem; color: var(--muted); }
+input, select {
+  width: 100%;
+  margin-top: 0.35rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(0,0,0,0.2);
+  color: var(--text);
+}
+
+.theme-pills {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.theme-pill {
+  border: 1px solid rgba(255,255,255,0.2);
+  background: transparent;
+  color: var(--text);
+  box-shadow: none;
+}
+
+.theme-pill.active {
+  border-color: var(--accent-2);
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+.motion-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.blob {
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  filter: blur(40px);
+  opacity: 0.55;
+  background: radial-gradient(circle at 30% 30%, var(--accent), transparent 60%);
+  animation: float 16s ease-in-out infinite;
+}
+
+.blob:nth-child(2) {
+  width: 420px;
+  height: 420px;
+  right: -80px;
+  top: 20%;
+  background: radial-gradient(circle at 40% 40%, var(--accent-2), transparent 60%);
+  animation-delay: -6s;
+}
+
+.blob:nth-child(3) {
+  width: 380px;
+  height: 380px;
+  left: 10%;
+  bottom: -120px;
+  background: radial-gradient(circle at 40% 40%, #8b5cf6, transparent 60%);
+  animation-delay: -2s;
+}
+
+@keyframes float {
+  0%,100% { transform: translateY(0) translateX(0) scale(1); }
+  50% { transform: translateY(-30px) translateX(20px) scale(1.08); }
+}
+
+.caption-box {
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 12px;
+  padding: 0.75rem;
+  min-height: 90px;
+}
+
+.chat-box {
+  background: rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  padding: 0.75rem;
+  min-height: 140px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(0,0,0,0.3);
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 640px){
+  .hero { flex-direction: column; align-items: flex-start; gap: 1rem; }
+  .main { padding: 1rem; }
+}
