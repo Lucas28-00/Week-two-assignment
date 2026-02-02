@@ -22,6 +22,8 @@
   const callStatus = document.getElementById('call-status');
   const remoteAudio = document.getElementById('remote-audio');
   const historyBox = document.getElementById('call-history');
+  const callLinkInput = document.getElementById('call-link');
+  const copyLinkBtn = document.getElementById('copy-link');
 
   const type = localStorage.getItem(TYPE_KEY);
   const phone = localStorage.getItem(PHONE_KEY) || 'Not provided';
@@ -67,6 +69,7 @@
   let dc = null;
   let roomId = null;
   let isInitiator = false;
+  let twilioConfig = { voiceEnabled: false, whatsappEnabled: false };
 
   function setStatus(text){ if(callStatus) callStatus.textContent = text; }
 
@@ -107,6 +110,57 @@
     const num = (callNumberInput?.value || '').trim();
     const full = `${code}${num}`.replace(/\D/g, '');
     return full;
+  }
+
+  function getE164(){
+    const code = (callCodeSelect?.value || '+256');
+    const num = (callNumberInput?.value || '').trim();
+    const full = `${code}${num}`.replace(/\s+/g, '');
+    return full.startsWith('+') ? full : `+${full}`;
+  }
+
+  function updateCallLink(){
+    if(!callLinkInput) return;
+    const num = (callNumberInput?.value || '').trim();
+    if(!num){
+      callLinkInput.value = '';
+      return;
+    }
+    const e164 = getE164();
+    const url = `${location.origin}${location.pathname}?room=${encodeURIComponent(e164)}`;
+    callLinkInput.value = url;
+  }
+
+  function matchCountryCode(roomDigits){
+    if(!callCodeSelect) return null;
+    const options = Array.from(callCodeSelect.options || []);
+    let best = null;
+    options.forEach(opt=>{
+      const code = String(opt.value || '').replace(/\D/g, '');
+      if(code && roomDigits.startsWith(code)){
+        if(!best || code.length > best.code.length){
+          best = { code, value: opt.value };
+        }
+      }
+    });
+    return best;
+  }
+
+  function applyRoomFromUrl(){
+    const params = new URLSearchParams(location.search);
+    const room = params.get('room');
+    if(!room) return;
+    const digits = room.replace(/\D/g, '');
+    if(!digits) return;
+    const match = matchCountryCode(digits);
+    if(match && callCodeSelect){
+      callCodeSelect.value = match.value;
+      const remaining = digits.slice(match.code.length);
+      if(callNumberInput) callNumberInput.value = remaining;
+    } else if(callNumberInput){
+      callNumberInput.value = digits;
+    }
+    updateCallLink();
   }
 
   function sendSignal(data){
@@ -177,6 +231,14 @@
   }
 
   async function connectCall(){
+    if(twilioConfig.voiceEnabled){
+      await startTwilioVoiceCall();
+      return;
+    }
+    await connectWebRtcCall();
+  }
+
+  async function connectWebRtcCall(){
     roomId = normalizeRoom();
     if(!roomId){
       alert('Enter a phone number to start the call.');
@@ -205,6 +267,32 @@
       }
     };
     ws.onclose = ()=> setStatus('Disconnected');
+  }
+
+  async function startTwilioVoiceCall(){
+    const to = getE164();
+    if(!to){
+      alert('Enter a phone number to start the call.');
+      return;
+    }
+    const user = localStorage.getItem(PHONE_KEY) || '';
+    addHistory(to);
+    setStatus('Calling via Twilio…');
+    try{
+      const res = await fetch('/api/voice-call', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ to, user })
+      });
+      if(!res.ok){
+        const err = await res.json().catch(()=>({}));
+        throw new Error(err.error || 'Call failed');
+      }
+      setStatus('Call started');
+    }catch(err){
+      setStatus('Call failed');
+      alert(err.message || 'Failed to start call');
+    }
   }
 
   // Speech recognition for hearing users (voice -> text)
@@ -264,6 +352,9 @@
     if(type === 'deaf' || speakToggle.checked){
       speak(text);
     }
+    if(twilioConfig.whatsappEnabled){
+      sendWhatsAppMessage(text);
+    }
     if(dc && dc.readyState === 'open'){
       try{ dc.send(JSON.stringify({ type: 'text', text })); }catch(e){}
     }
@@ -279,11 +370,60 @@
 
   callCodeSelect?.addEventListener('change', ()=>{
     localStorage.setItem(CODE_KEY, callCodeSelect.value || '+256');
+    updateCallLink();
+  });
+
+  callNumberInput?.addEventListener('input', ()=>{
+    updateCallLink();
   });
 
   renderHistory();
 
+  applyRoomFromUrl();
+  updateCallLink();
+
   connectBtn?.addEventListener('click', ()=>{
     connectCall();
   });
+
+  copyLinkBtn?.addEventListener('click', async ()=>{
+    if(!callLinkInput || !callLinkInput.value){
+      alert('Enter a phone number to generate a call link.');
+      return;
+    }
+    try{
+      await navigator.clipboard.writeText(callLinkInput.value);
+    }catch(e){
+      callLinkInput.select();
+      document.execCommand('copy');
+    }
+  });
+
+  async function loadTwilioConfig(){
+    try{
+      const res = await fetch('/api/config');
+      if(!res.ok) return;
+      twilioConfig = await res.json();
+    }catch(e){}
+  }
+
+  async function sendWhatsAppMessage(message){
+    const to = getE164();
+    if(!to) return;
+    try{
+      const res = await fetch('/api/whatsapp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ to, message })
+      });
+      if(!res.ok){
+        const err = await res.json().catch(()=>({}));
+        throw new Error(err.error || 'WhatsApp failed');
+      }
+    }catch(err){
+      alert(err.message || 'Failed to send WhatsApp message');
+    }
+  }
+
+  loadTwilioConfig();
 })();

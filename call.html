@@ -251,6 +251,12 @@
           <span class="badge" id="call-status">Not connected</span>
         </div>
 
+        <p class="badge" style="margin-top:0.75rem;">Browser-to-browser calling: share the call link with the other person.</p>
+        <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+          <input id="call-link" type="text" readonly placeholder="Call link will appear here" style="min-width:260px;flex:1;" />
+          <button id="copy-link">Copy link</button>
+        </div>
+
         <audio id="remote-audio" autoplay></audio>
         <p class="badge">Phone calling is a demo UI for now.</p>
 
