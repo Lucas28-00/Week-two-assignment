@@ -1,50 +1,45 @@
-# AnyTalk — Week Two Assignment
+# AnyTalk — Communication Bridge (Week Two Assignment)
 
-AnyTalk is a browser-first prototype that helps deaf and hearing people communicate using speech-to-text and text-to-speech. Visitors choose whether they can hear when they arrive, and the call experience adapts:
+AnyTalk is an accessible communication tool that bridges the gap between hearing and deaf individuals. It provides a real-time speech-to-text and text-to-speech interface, running entirely in the browser.
 
-- Hearing users: microphone → captions (speech-to-text)
-- Deaf/Hard of hearing users: typed text → spoken audio (text-to-speech)
-- Text-to-text and speech-to-speech are supported in the interface
+## Features
 
-## What’s included
+- **Hearing Mode**: Speak into the microphone, and the app displays your words as large, readable text for a deaf partner.
+- **Deaf Mode**: Type your message, and the app speaks it aloud for a hearing partner.
+- **Single-Device Bridge**: designed to be used on a single device passed between users or shared in a conversation.
+- **Visual Design**: Animated themes, clear typography, and responsive interface.
 
-- Animated, themeable home page with language picker (default: UK English)
-- Hearing/deaf selection stored in localStorage
-- Country calling code selector (default: Uganda +256)
-- Call page with WebRTC connect button, chat transcript, and call history panel
-- Logo + favicon
+## How to use
 
-## How to run
+1. Open the application in a modern browser (Chrome, Edge, or Safari).
+2. Select your role:
+   - **I can hear**: Use the microphone to speak. The app will transcribe your voice.
+   - **I am Deaf / HoH**: Use the text input to type. The app will speak your message.
+3. Switch modes easily with the "Change Mode" button.
 
-Install dependencies and run the signaling server (required for WebRTC calling):
+## Setup
 
-```bash
-npm install
-npm start
-```
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-Then open http://localhost:3000 in two browsers/devices, choose hearing status, and use the same full phone number (country code + number) so both clients join the same call room.
+2. Start the local server:
+   ```bash
+   npm start
+   ```
 
-> Note: SpeechRecognition and SpeechSynthesis depend on browser support (Chrome/Edge recommended).
+3. Open your browser at `http://localhost:3000`.
 
-## Files
+## Technology
 
-- index.html — home page and hearing/deaf selection
-- call.html — call experience with mic or chat, connect button, call history
-- styles.css — themes and motion animation
-- theme.js — theme switching
-- app.js — home page logic
-- call.js — call page logic
-- logo.svg, favicon.svg — branding assets
+- **HTML5 & CSS3**: Custom responsive design with CSS variables for theming.
+- **JavaScript (ES6+)**: Logic for UI state and Web APIs.
+- **Web Speech API**:
+  - `SpeechRecognition`: For converting speech to text.
+  - `SpeechSynthesis`: For converting text to speech.
+- **Node.js**: Simple static file server (Express).
 
-## Notes about calling
+## Accessibility
 
-- The “phone number” is used as a shared room ID for WebRTC signaling. It does not place real PSTN calls.
-- For real phone calls, you would need a telephone provider (e.g., Twilio) and server-side PSTN integration.
-- Call history is saved locally in the browser (last 10 entries).
-
-## Roadmap (optional)
-
-- Real calling with phone numbers (PSTN/SIP integration)
-- WebRTC captions across remote peers
-- Secure account system and profile preferences
+The application is designed with high contrast text, large touch targets, and clear visual indicators for active states (e.g., listening mode).
